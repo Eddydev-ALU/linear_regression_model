@@ -1,15 +1,16 @@
 # Life Expectancy Prediction Model
 
-## 📌 Project Overview
-This project focuses on predicting the **life expectancy** of populations across different countries using a variety of socio-economic and health-related indicators. The goal is to help public-health organizations and NGOs prioritize interventions (e.g., immunization campaigns, schooling investment, HIV/AIDS programs) in regions where life expectancy is projected to be the lowest.
+## Mission & Problem Statement
+**Problem:** Public health organizations need data-driven ways to prioritize resource allocation effectively to improve global health outcomes.  
+**Mission:** To leverage machine learning to identify the key socio-economic and health factors that most significantly impact life expectancy across nations, enabling public-health organizations and policymakers — particularly in developing countries — to make data-driven decisions about where to allocate resources (immunization programs, education investment, HIV/AIDS intervention, and nutrition initiatives) for the greatest improvement in population health outcomes.
 
-## 📊 Dataset
+## Dataset
 - **Source:** WHO Life Expectancy Dataset (Kaggle)
 - **Period:** 2000–2015
 - **Coverage:** 193 countries (2,938 records)
 - **Target Variable:** `Life expectancy` (continuous, in years)
 
-## 🚀 What We Have Done So Far
+## What We Have Done So Far
 
 ### 1. Data Cleaning & Feature Engineering
 - **Missing Values:** Dropped rows missing the target variable and imputed remaining missing features using column medians.
