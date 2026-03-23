@@ -6,7 +6,7 @@ FastAPI-based REST API that serves the best-performing regression model (Random 
 
 ```
 life-expectancy-api/
-├── main.py               # FastAPI application (prediction + retrain endpoints)
+├── prediction.py               # FastAPI application (prediction + retrain endpoints)
 ├── predict.py            # Standalone prediction script (Task 1 bridge)
 ├── requirements.txt      # Python dependencies
 ├── render.yaml           # Render deployment blueprint
