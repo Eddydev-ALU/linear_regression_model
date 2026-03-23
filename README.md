@@ -1,5 +1,9 @@
 # Life Expectancy Prediction Ecosystem
 
+## Live Demo (Hosted API)
+- **Interactive API Documentation (Swagger UI):** [https://life-expectancy-predictor-19yh.onrender.com/docs](https://life-expectancy-predictor-19yh.onrender.com/docs)
+- **Base API URL:** `https://life-expectancy-predictor-19yh.onrender.com`
+
 ## Mission & Problem Statement
 **Problem:** Public health organizations need data-driven ways to prioritize resource allocation effectively to improve global health outcomes.  
 **Mission:** To leverage machine learning to identify the key socio-economic and health factors that most significantly impact life expectancy across nations. This enables public-health organizations and policymakers — particularly in developing countries — to make data-driven decisions about where to allocate resources (immunization programs, education investment, HIV/AIDS intervention, and nutrition initiatives) for the greatest improvement in population health outcomes.
@@ -46,6 +50,7 @@ It consists of three main components contained within the `summative/` directory
 - Created a robust FastAPI wrapper (`prediction.py`) around our pickled machine learning model.
 - Secured the API with CORS origin whitelisting.
 - Deployed to **Render** using a custom `render.yaml` ensuring specific Python and pip versions to handle heavy ML libraries gracefully.
+- The hosted API is live at: `https://life-expectancy-predictor-19yh.onrender.com`
 
 ### 5. Flutter App Development
 - Built `life_expectancy_predictor` featuring a clean, Material 3 compliant UI.
