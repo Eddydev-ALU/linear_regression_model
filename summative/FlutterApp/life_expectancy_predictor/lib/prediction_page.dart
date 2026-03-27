@@ -17,7 +17,7 @@ class PredictionPage extends StatefulWidget {
 }
 
 class _PredictionPageState extends State<PredictionPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
@@ -28,9 +28,19 @@ class _PredictionPageState extends State<PredictionPage>
   double? _prediction;
   String? _errorMessage;
   String? _focusedFieldKey;
+  bool _buttonPressed = false;
 
   late AnimationController _resultAnimCtrl;
   late Animation<double> _resultFadeIn;
+
+  late AnimationController _pageAnimCtrl;
+  late Animation<double> _headerFade;
+  late Animation<Offset> _headerSlide;
+  late Animation<double> _bodyFade;
+  late Animation<Offset> _bodySlide;
+
+  late AnimationController _buttonPulseCtrl;
+  late Animation<double> _buttonPulse;
 
   // ── Design tokens ──────────────────────────────────────────────────────
   static const _orange = Color(0xFFFF7A2F);
@@ -64,6 +74,45 @@ class _PredictionPageState extends State<PredictionPage>
       parent: _resultAnimCtrl,
       curve: Curves.easeOut,
     );
+
+    // Page entrance animation
+    _pageAnimCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    _headerFade = CurvedAnimation(
+      parent: _pageAnimCtrl,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+    );
+    _headerSlide = Tween<Offset>(
+      begin: const Offset(0, -0.06),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _pageAnimCtrl,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+    ));
+    _bodyFade = CurvedAnimation(
+      parent: _pageAnimCtrl,
+      curve: const Interval(0.25, 1.0, curve: Curves.easeOut),
+    );
+    _bodySlide = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _pageAnimCtrl,
+      curve: const Interval(0.25, 1.0, curve: Curves.easeOut),
+    ));
+    _pageAnimCtrl.forward();
+
+    // Predict button glow pulse
+    _buttonPulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat(reverse: true);
+    _buttonPulse = CurvedAnimation(
+      parent: _buttonPulseCtrl,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -75,6 +124,8 @@ class _PredictionPageState extends State<PredictionPage>
       n.dispose();
     }
     _resultAnimCtrl.dispose();
+    _pageAnimCtrl.dispose();
+    _buttonPulseCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -213,18 +264,32 @@ class _PredictionPageState extends State<PredictionPage>
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader()),
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _headerFade,
+                  child: SlideTransition(
+                    position: _headerSlide,
+                    child: _buildHeader(),
+                  ),
+                ),
+              ),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          for (final entry in _grouped.entries)
-                            _buildSectionCard(entry.key, entry.value),
-                        ],
+                    FadeTransition(
+                      opacity: _bodyFade,
+                      child: SlideTransition(
+                        position: _bodySlide,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              for (final entry in _grouped.entries)
+                                _buildSectionCard(entry.key, entry.value),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -602,43 +667,71 @@ class _PredictionPageState extends State<PredictionPage>
 
   // ── Predict Button ─────────────────────────────────────────────────────
   Widget _buildPredictButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _submit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _orange,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: _orange.withOpacity(0.5),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.5,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.auto_awesome_rounded, size: 19),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Predict',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+    return AnimatedScale(
+      scale: _buttonPressed ? 0.96 : 1.0,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
+      child: AnimatedBuilder(
+        animation: _buttonPulse,
+        builder: (context, _) {
+          final pulse = _isLoading ? 0.0 : _buttonPulse.value;
+          return Container(
+            width: double.infinity,
+            height: 54,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [_orange, Color(0xFFFF9F5F)],
               ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: _orange.withOpacity(0.25 + pulse * 0.28),
+                  blurRadius: 10 + pulse * 14,
+                  offset: const Offset(0, 4),
+                  spreadRadius: pulse * 2,
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                splashColor: Colors.white.withOpacity(0.18),
+                highlightColor: Colors.white.withOpacity(0.06),
+                onTap: _isLoading ? null : _submit,
+                onTapDown: _isLoading
+                    ? null
+                    : (_) => setState(() => _buttonPressed = true),
+                onTapUp: _isLoading
+                    ? null
+                    : (_) => setState(() => _buttonPressed = false),
+                onTapCancel: _isLoading
+                    ? null
+                    : () => setState(() => _buttonPressed = false),
+                child: Center(
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          'Predict',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
