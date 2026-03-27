@@ -1,6 +1,7 @@
 # Life Expectancy Prediction Ecosystem
 
 ## Live Demo (Hosted API)
+- **Demo Video:** [https://youtu.be/thw0a8jb4mA](https://youtu.be/thw0a8jb4mA)
 - **Interactive API Documentation (Swagger UI):** [https://life-expectancy-predictor-19yh.onrender.com/docs](https://life-expectancy-predictor-19yh.onrender.com/docs)
 - **Base API URL:** `https://life-expectancy-predictor-19yh.onrender.com`
 
